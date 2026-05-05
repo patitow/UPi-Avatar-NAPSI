@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from "motion/react";
 
 interface QuickActionsProps {
   onSelectAction: (action: string) => void;
@@ -6,31 +6,31 @@ interface QuickActionsProps {
 
 const quickActions = [
   {
-    icon: '📚',
-    label: 'Informações Acadêmicas',
-    query: 'Como funcionam as matrículas na POLI?',
+    icon: "📚",
+    label: "Informações Acadêmicas",
+    query: "Como funcionam as matrículas na POLI?",
   },
   {
-    icon: '🤝',
-    label: 'Sobre o NAPSI',
-    query: 'O que é o NAPSI e como ele pode me ajudar?',
+    icon: "🤝",
+    label: "Sobre o NAPSI",
+    query: "O que é o NAPSI e como ele pode me ajudar?",
   },
   {
-    icon: '📧',
-    label: 'Contato',
-    query: 'Como entrar em contato com o NAPSI?',
+    icon: "📧",
+    label: "Contato",
+    query: "Como entrar em contato com o NAPSI?",
   },
   {
-    icon: '♿',
-    label: 'Acessibilidade',
-    query: 'Quais recursos de acessibilidade a POLI oferece?',
+    icon: "♿",
+    label: "Acessibilidade",
+    query: "Quais recursos de acessibilidade a POLI oferece?",
   },
 ];
 
 export function QuickActions({ onSelectAction }: QuickActionsProps) {
   return (
     <div className="space-y-3">
-      <p className="text-sm text-slate-600 text-center px-4">
+      <p className="text-sm text-slate-600 text-center px-4 mb-[6px]">
         Ou escolha uma das opções abaixo:
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

@@ -13,11 +13,12 @@ interface AvatarDisplayProps {
 }
 
 const stateToAsset = {
-  idle: "/assets/static_sprites/API -ROBÔ ANIMAÇÕES.png",
-  thinking: "/assets/static_sprites/API -ROBÔ ANIMAÇÕES - pesquisando.png",
-  talking: "/assets/animated_sprites/API -ROBÔ ANIMAÇÕES.gif",
-  happy: "/assets/animated_sprites/API -ROBÔ ANIMAÇÕES(1).gif",
-  surprised: "/assets/static_sprites/API -ROBÔ ANIMAÇÕES - 3.png",
+  idle: "/assets/static_sprites/showing_computer_idle.png",
+  thinking: "/assets/animated_sprites/thinking.gif",
+  talking: "/assets/animated_sprites/waving.gif",
+  happy: "/assets/animated_sprites/celebrating.gif",
+  surprised: "/assets/animated_sprites/unsure.gif",
+  investigating: "/assets/animated_sprites/investigating.gif",
 };
 
 export function AvatarDisplay({ state, isLoginScreen }: AvatarDisplayProps) {
