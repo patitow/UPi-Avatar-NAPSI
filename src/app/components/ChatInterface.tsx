@@ -1,16 +1,16 @@
-import { useState, useEffect, useRef } from 'react';
-import { motion } from 'motion/react';
-import { LogOut, Menu, X, Info, Settings } from 'lucide-react';
-import { AvatarDisplay, AvatarState } from './AvatarDisplay';
-import { MessageBubble, Message } from './MessageBubble';
-import { TypingIndicator } from './TypingIndicator';
-import { ChatInput } from './ChatInput';
-import { QuickActions } from './QuickActions';
-import { Disclaimer } from './Disclaimer';
-import { ScrollToBottom } from './ScrollToBottom';
-import { StatusIndicator } from './StatusIndicator';
-import { InfoModal } from './InfoModal';
-import { SettingsModal } from './SettingsModal';
+import { useState, useEffect, useRef } from "react";
+import { motion } from "motion/react";
+import { LogOut, Menu, X, Info, Settings } from "lucide-react";
+import { AvatarDisplay, AvatarState } from "./AvatarDisplay";
+import { MessageBubble, Message } from "./MessageBubble";
+import { TypingIndicator } from "./TypingIndicator";
+import { ChatInput } from "./ChatInput";
+import { QuickActions } from "./QuickActions";
+import { Disclaimer } from "./Disclaimer";
+import { ScrollToBottom } from "./ScrollToBottom";
+import { StatusIndicator } from "./StatusIndicator";
+import { InfoModal } from "./InfoModal";
+import { SettingsModal } from "./SettingsModal";
 
 interface ChatInterfaceProps {
   onLogout: () => void;
@@ -18,34 +18,37 @@ interface ChatInterfaceProps {
 
 // Mock responses do UPi
 const mockResponses = [
-  'Oxente! Que bom te ver por aqui! Como posso te ajudar hoje?',
-  'Massa! Deixa eu ver o que posso fazer por você...',
-  'Opa! Entendi sua dúvida. O NAPSI funciona de segunda a sexta, das 8h às 17h.',
-  'Eita! Essa pergunta é mais específica. Vou te passar o contato do NAPSI: napsi@poli.upe.br',
-  'Beleza! Para mais informações sobre matrícula, você pode acessar o portal do aluno.',
-  'Pronto! Espero ter ajudado. Se precisar de mais alguma coisa, é só chamar!',
-  'Desculpe, não tenho informações sobre isso no momento. Mas posso te passar o email do NAPSI: napsi@poli.upe.br',
-  'Tá certo! O NAPSI oferece apoio psicopedagógico, orientação acadêmica e suporte para inclusão.',
+  "Que bom te ver por aqui! Como posso te ajudar hoje?",
+  "Massa! Deixa eu ver o que posso fazer por você...",
+  "Opa! Entendi sua dúvida. O NAPSI funciona de segunda a sexta, das 8h às 17h.",
+  "Eita! Essa pergunta é mais específica. Vou te passar o contato do NAPSI: napsi@poli.upe.br",
+  "Beleza! Para mais informações sobre matrícula, você pode acessar o portal do aluno.",
+  "Pronto! Espero ter ajudado. Se precisar de mais alguma coisa, é só chamar!",
+  "Desculpe, não tenho informações sobre isso no momento. Mas posso te passar o email do NAPSI: napsi@poli.upe.br",
+  "Tá certo! O NAPSI oferece apoio psicopedagógico, orientação acadêmica e suporte para inclusão.",
 ];
 
 const welcomeMessage: Message = {
-  id: '0',
-  content: 'Oi! Eu sou o UPi, seu assistente virtual do NAPSI! 😊\n\nEstou aqui pra te ajudar com informações sobre a POLI/UPE, suporte acadêmico e orientações institucionais.\n\nComo posso te ajudar hoje?',
-  sender: 'upi',
+  id: "0",
+  content:
+    "Oi! Eu sou o UPi, seu assistente virtual do NAPSI! 😊\n\nEstou aqui pra te ajudar com informações sobre a POLI/UPE, suporte acadêmico e orientações institucionais.\n\nComo posso te ajudar hoje?",
+  sender: "upi",
   timestamp: new Date(),
 };
 
 export function ChatInterface({ onLogout }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([welcomeMessage]);
   const [isTyping, setIsTyping] = useState(false);
-  const [avatarState, setAvatarState] = useState<AvatarState>('idle');
+  const [avatarState, setAvatarState] = useState<AvatarState>("idle");
   const [menuOpen, setMenuOpen] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  
+
   // Acessibilidade
-  const [fontSize, setFontSize] = useState<'normal' | 'large' | 'extra-large'>('normal');
+  const [fontSize, setFontSize] = useState<"normal" | "large" | "extra-large">(
+    "normal",
+  );
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [voiceSpeed, setVoiceSpeed] = useState(1);
 
@@ -55,18 +58,18 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
   // Função para TTS
   const speakMessage = (text: string) => {
     if (!voiceEnabled) return;
-    
+
     // Cancela qualquer fala em andamento
     window.speechSynthesis.cancel();
-    
+
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'pt-BR';
+    utterance.lang = "pt-BR";
     utterance.rate = voiceSpeed;
     window.speechSynthesis.speak(utterance);
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleScroll = () => {
@@ -85,54 +88,55 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
     const userMessage: Message = {
       id: Date.now().toString(),
       content,
-      sender: 'user',
+      sender: "user",
       timestamp: new Date(),
     };
     setMessages((prev) => [...prev, userMessage]);
 
     // UPi real response
-    setAvatarState('thinking');
+    setAvatarState("thinking");
     setIsTyping(true);
 
     try {
-      const response = await fetch('http://localhost:8000/chat', {
-        method: 'POST',
+      const response = await fetch("http://localhost:8000/chat", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ message: content }),
       });
 
-      if (!response.ok) throw new Error('Falha na comunicação com o UPi');
+      if (!response.ok) throw new Error("Falha na comunicação com o UPi");
 
       const data = await response.json();
-      
+
       // Update avatar based on emotion
       const emotion = data.emotion as AvatarState;
-      setAvatarState(emotion || 'talking');
-      
+      setAvatarState(emotion || "talking");
+
       const upiMessage: Message = {
         id: Date.now().toString(),
         content: data.response,
-        sender: 'upi',
+        sender: "upi",
         timestamp: new Date(),
       };
-      
+
       setMessages((prev) => [...prev, upiMessage]);
       speakMessage(data.response);
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
       const errorMessage: Message = {
         id: Date.now().toString(),
-        content: 'Eita! Tive um probleminha aqui pra te responder. Tenta de novo em instantes!',
-        sender: 'upi',
+        content:
+          "Eita! Tive um probleminha aqui pra te responder. Tenta de novo em instantes!",
+        sender: "upi",
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsTyping(false);
       // Wait a bit before going back to idle if it was talking/happy
-      setTimeout(() => setAvatarState('idle'), 3000);
+      setTimeout(() => setAvatarState("idle"), 3000);
     }
   };
 
@@ -140,10 +144,14 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
     <div className="h-[100dvh] flex flex-col relative overflow-hidden bg-slate-50">
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-cyan-50 to-purple-50">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-cyan-200/20 rounded-full blur-3xl animate-pulse"
-             style={{ animationDuration: '8s' }} />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl animate-pulse"
-             style={{ animationDuration: '10s', animationDelay: '2s' }} />
+        <div
+          className="absolute top-0 left-0 w-96 h-96 bg-cyan-200/20 rounded-full blur-3xl animate-pulse"
+          style={{ animationDuration: "8s" }}
+        />
+        <div
+          className="absolute bottom-0 right-0 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl animate-pulse"
+          style={{ animationDuration: "10s", animationDelay: "2s" }}
+        />
       </div>
 
       {/* Header */}
@@ -154,14 +162,14 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
         className="relative z-10 bg-white/80 backdrop-blur-xl border-b border-slate-100 shadow-sm"
       >
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div>
-              <h1 className="text-xl bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent font-bold">
-                UPi
-              </h1>
-              <div className="flex items-center gap-2">
-                <StatusIndicator status={isTyping ? 'busy' : 'online'} />
-              </div>
+          <div>
+            <h1 className="text-xl bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent font-bold">
+              UPi
+            </h1>
+            <div className="flex items-center gap-2">
+              <StatusIndicator status={isTyping ? "busy" : "online"} />
             </div>
+          </div>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-2">
@@ -196,7 +204,11 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
             onClick={() => setMenuOpen(!menuOpen)}
             className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-all"
           >
-            {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {menuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
 
@@ -231,7 +243,10 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
       </motion.header>
 
       {/* Main Chat Area */}
-      <main role="main" className="relative z-10 flex-1 flex flex-col max-w-5xl w-full mx-auto px-4 py-4 overflow-hidden">
+      <main
+        role="main"
+        className="relative z-10 flex-1 flex flex-col max-w-5xl w-full mx-auto px-4 py-4 overflow-hidden"
+      >
         {/* Avatar Section */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
@@ -252,7 +267,11 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
           aria-live="polite"
           aria-label="Histórico de mensagens"
           className={`flex-1 overflow-y-auto mb-2 space-y-3 scroll-smooth pr-2 custom-scrollbar ${
-            fontSize === 'large' ? 'text-lg' : fontSize === 'extra-large' ? 'text-xl' : 'text-base'
+            fontSize === "large"
+              ? "text-lg"
+              : fontSize === "extra-large"
+                ? "text-xl"
+                : "text-base"
           }`}
         >
           {messages.map((message, index) => (
@@ -281,7 +300,10 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
       <ScrollToBottom onClick={scrollToBottom} visible={showScrollButton} />
 
       {/* Info Modal */}
-      <InfoModal isOpen={showInfoModal} onClose={() => setShowInfoModal(false)} />
+      <InfoModal
+        isOpen={showInfoModal}
+        onClose={() => setShowInfoModal(false)}
+      />
 
       {/* Settings Modal */}
       <SettingsModal
@@ -296,11 +318,15 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
       />
 
       {/* Footer */}
-      <footer role="contentinfo" className="relative z-10 bg-white/60 backdrop-blur-xl border-t border-slate-100 py-4">
+      <footer
+        role="contentinfo"
+        className="relative z-10 bg-white/60 backdrop-blur-xl border-t border-slate-100 py-4"
+      >
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-2">
             <p className="text-xs text-slate-500 text-center md:text-left">
-              UPi • NAPSI - Núcleo de Apoio Psicopedagógico e Social Inclusivo • POLI/UPE
+              UPi • NAPSI - Núcleo de Apoio Psicopedagógico e Social Inclusivo •
+              POLI/UPE
             </p>
             <div className="flex items-center gap-4 text-xs">
               <a
