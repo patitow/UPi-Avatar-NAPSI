@@ -24,7 +24,7 @@ export function MessageBubble({ message, index }: MessageBubbleProps) {
         delay: index * 0.05,
         ease: 'easeOut',
       }}
-      className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
+      className={`flex items-start gap-3 w-full ${isUser ? 'justify-end' : 'justify-start'}`}
     >
       {/* Avatar */}
       {!isUser && (
@@ -39,10 +39,9 @@ export function MessageBubble({ message, index }: MessageBubbleProps) {
         </div>
       )}
 
-      {/* Message Content */}
       <motion.div
         whileHover={{ scale: 1.01 }}
-        className={`max-w-[75%] md:max-w-[65%] ${isUser ? 'ml-auto' : 'mr-auto'}`}
+        className="max-w-[75%] md:max-w-[65%]"
       >
         <div
           className={`px-5 py-3.5 rounded-3xl shadow-sm ${

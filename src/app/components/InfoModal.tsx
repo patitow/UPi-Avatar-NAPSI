@@ -40,13 +40,14 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
 
               {/* Header */}
               <div className="text-center mb-6">
-                <div className="relative inline-block mb-4">
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full blur-2xl opacity-30" />
-                  <img
-                    src="/src/imports/image.png"
-                    alt="UPi"
-                    className="relative w-20 h-20 object-contain drop-shadow-xl"
-                  />
+                <div className="flex justify-center mb-4">
+                  <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-white shadow-xl bg-slate-900">
+                    <img
+                      src="/src/imports/image-2.png"
+                      alt="UPi"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 </div>
                 <h2 className="text-2xl mb-2 bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
                   Sobre o UPi
