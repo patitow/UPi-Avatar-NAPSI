@@ -1,12 +1,22 @@
 import { motion } from 'motion/react';
 
-export type AvatarState = 'idle' | 'thinking' | 'talking';
+export type AvatarState = 'idle' | 'thinking' | 'talking' | 'happy' | 'surprised';
 
 interface AvatarDisplayProps {
   state: AvatarState;
 }
 
+const stateToAsset = {
+  idle: '/assets/static_sprites/API -ROBÔ ANIMAÇÕES.png',
+  thinking: '/assets/static_sprites/API -ROBÔ ANIMAÇÕES - pesquisando.png',
+  talking: '/assets/animated_sprites/API -ROBÔ ANIMAÇÕES.gif',
+  happy: '/assets/static_sprites/API -ROBÔ ANIMAÇÕES - feliz com feedback.png',
+  surprised: '/assets/static_sprites/API -ROBÔ ANIMAÇÕES - 3.png',
+};
+
 export function AvatarDisplay({ state }: AvatarDisplayProps) {
+  const assetUrl = stateToAsset[state] || stateToAsset.idle;
+
   return (
     <div className="relative">
       {/* Glow effect */}
@@ -37,9 +47,10 @@ export function AvatarDisplay({ state }: AvatarDisplayProps) {
         className="relative"
       >
         <img
-          src="/src/imports/image.png"
+          src={assetUrl}
+          key={assetUrl} // Force re-render for GIFs
           alt="UPi"
-          className="w-24 h-24 md:w-32 md:h-32 object-contain drop-shadow-2xl relative z-10"
+          className="w-48 h-48 md:w-56 md:h-56 object-contain drop-shadow-2xl relative z-10"
         />
       </motion.div>
 

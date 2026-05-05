@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { LogOut, Menu, X, Info } from 'lucide-react';
+import { LogOut, Menu, X, Info, Settings } from 'lucide-react';
 import { AvatarDisplay, AvatarState } from './AvatarDisplay';
 import { MessageBubble, Message } from './MessageBubble';
 import { TypingIndicator } from './TypingIndicator';
@@ -10,6 +10,7 @@ import { Disclaimer } from './Disclaimer';
 import { ScrollToBottom } from './ScrollToBottom';
 import { StatusIndicator } from './StatusIndicator';
 import { InfoModal } from './InfoModal';
+import { SettingsModal } from './SettingsModal';
 
 interface ChatInterfaceProps {
   onLogout: () => void;
@@ -41,8 +42,28 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  
+  // Acessibilidade
+  const [fontSize, setFontSize] = useState<'normal' | 'large' | 'extra-large'>('normal');
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [voiceSpeed, setVoiceSpeed] = useState(1);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  // Função para TTS
+  const speakMessage = (text: string) => {
+    if (!voiceEnabled) return;
+    
+    // Cancela qualquer fala em andamento
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'pt-BR';
+    utterance.rate = voiceSpeed;
+    window.speechSynthesis.speak(utterance);
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -59,7 +80,7 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  const handleSendMessage = (content: string) => {
+  const handleSendMessage = async (content: string) => {
     // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -69,26 +90,50 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
     };
     setMessages((prev) => [...prev, userMessage]);
 
-    // Simulate UPi response
+    // UPi real response
     setAvatarState('thinking');
     setIsTyping(true);
 
-    setTimeout(() => {
-      setAvatarState('talking');
-      setTimeout(() => {
-        const randomResponse =
-          mockResponses[Math.floor(Math.random() * mockResponses.length)];
-        const upiMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: randomResponse,
-          sender: 'upi',
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, upiMessage]);
-        setIsTyping(false);
-        setAvatarState('idle');
-      }, 1500);
-    }, 1000);
+    try {
+      const response = await fetch('http://localhost:8000/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: content }),
+      });
+
+      if (!response.ok) throw new Error('Falha na comunicação com o UPi');
+
+      const data = await response.json();
+      
+      // Update avatar based on emotion
+      const emotion = data.emotion as AvatarState;
+      setAvatarState(emotion || 'talking');
+      
+      const upiMessage: Message = {
+        id: Date.now().toString(),
+        content: data.response,
+        sender: 'upi',
+        timestamp: new Date(),
+      };
+      
+      setMessages((prev) => [...prev, upiMessage]);
+      speakMessage(data.response);
+    } catch (error) {
+      console.error('Error:', error);
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        content: 'Eita! Tive um probleminha aqui pra te responder. Tenta de novo em instantes!',
+        sender: 'upi',
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsTyping(false);
+      // Wait a bit before going back to idle if it was talking/happy
+      setTimeout(() => setAvatarState('idle'), 3000);
+    }
   };
 
   return (
@@ -130,6 +175,14 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-2">
+            <button
+              onClick={() => setShowSettingsModal(true)}
+              className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900
+                         hover:bg-slate-100 rounded-xl transition-all duration-200"
+            >
+              <Settings className="w-4 h-4" />
+              <span>Acessibilidade</span>
+            </button>
             <button
               onClick={() => setShowInfoModal(true)}
               className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900
@@ -206,7 +259,9 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
           role="log"
           aria-live="polite"
           aria-label="Histórico de mensagens"
-          className="flex-1 overflow-y-auto mb-6 space-y-4 scroll-smooth"
+          className={`flex-1 overflow-y-auto mb-6 space-y-4 scroll-smooth ${
+            fontSize === 'large' ? 'text-lg' : fontSize === 'extra-large' ? 'text-xl' : 'text-base'
+          }`}
           style={{ maxHeight: 'calc(100vh - 400px)' }}
         >
           {messages.map((message, index) => (
@@ -236,6 +291,18 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
 
       {/* Info Modal */}
       <InfoModal isOpen={showInfoModal} onClose={() => setShowInfoModal(false)} />
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+        fontSize={fontSize}
+        setFontSize={setFontSize}
+        voiceEnabled={voiceEnabled}
+        setVoiceEnabled={setVoiceEnabled}
+        voiceSpeed={voiceSpeed}
+        setVoiceSpeed={setVoiceSpeed}
+      />
 
       {/* Footer */}
       <footer role="contentinfo" className="relative z-10 bg-white/60 backdrop-blur-xl border-t border-slate-100 py-4">
