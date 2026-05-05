@@ -50,7 +50,7 @@ export function AvatarDisplay({ state }: AvatarDisplayProps) {
           src={assetUrl}
           key={assetUrl} // Force re-render for GIFs
           alt="UPi"
-          className="w-48 h-48 md:w-56 md:h-56 object-contain drop-shadow-2xl relative z-10"
+          className="w-full h-full object-contain drop-shadow-2xl relative z-10"
         />
       </motion.div>
 

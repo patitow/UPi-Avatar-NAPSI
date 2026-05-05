@@ -137,7 +137,7 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden">
+    <div className="h-[100dvh] flex flex-col relative overflow-hidden bg-slate-50">
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-cyan-50 to-purple-50">
         <div className="absolute top-0 left-0 w-96 h-96 bg-cyan-200/20 rounded-full blur-3xl animate-pulse"
@@ -154,24 +154,14 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
         className="relative z-10 bg-white/80 backdrop-blur-xl border-b border-slate-100 shadow-sm"
       >
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full blur-xl opacity-30" />
-              <img
-                src="/src/imports/image.png"
-                alt="UPi"
-                className="relative w-12 h-12 object-contain"
-              />
-            </div>
             <div>
-              <h1 className="text-xl bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+              <h1 className="text-xl bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent font-bold">
                 UPi
               </h1>
               <div className="flex items-center gap-2">
                 <StatusIndicator status={isTyping ? 'busy' : 'online'} />
               </div>
             </div>
-          </div>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-2">
@@ -241,15 +231,17 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
       </motion.header>
 
       {/* Main Chat Area */}
-      <main role="main" className="relative z-10 flex-1 flex flex-col max-w-5xl w-full mx-auto px-4 py-6">
+      <main role="main" className="relative z-10 flex-1 flex flex-col max-w-5xl w-full mx-auto px-4 py-4 overflow-hidden">
         {/* Avatar Section */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="flex justify-center mb-6"
+          className="flex justify-center mb-2 flex-shrink-0"
         >
-          <AvatarDisplay state={avatarState} />
+          <div className="w-32 h-32 md:w-40 md:h-40">
+            <AvatarDisplay state={avatarState} />
+          </div>
         </motion.div>
 
         {/* Messages Container */}
@@ -259,10 +251,9 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
           role="log"
           aria-live="polite"
           aria-label="Histórico de mensagens"
-          className={`flex-1 overflow-y-auto mb-6 space-y-4 scroll-smooth ${
+          className={`flex-1 overflow-y-auto mb-2 space-y-3 scroll-smooth pr-2 custom-scrollbar ${
             fontSize === 'large' ? 'text-lg' : fontSize === 'extra-large' ? 'text-xl' : 'text-base'
           }`}
-          style={{ maxHeight: 'calc(100vh - 400px)' }}
         >
           {messages.map((message, index) => (
             <MessageBubble key={message.id} message={message} index={index} />
@@ -271,7 +262,7 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
 
           {/* Quick Actions - Show only on first message */}
           {messages.length === 1 && !isTyping && (
-            <div className="mt-6 space-y-4">
+            <div className="mt-4 space-y-3">
               <QuickActions onSelectAction={handleSendMessage} />
               <Disclaimer />
             </div>
@@ -281,7 +272,7 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
         </div>
 
         {/* Input Area */}
-        <div className="mt-auto">
+        <div className="mt-auto flex-shrink-0 pb-2 md:pb-0">
           <ChatInput onSendMessage={handleSendMessage} disabled={isTyping} />
         </div>
       </main>

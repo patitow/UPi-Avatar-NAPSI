@@ -29,14 +29,12 @@ export function MessageBubble({ message, index }: MessageBubbleProps) {
       {/* Avatar */}
       {!isUser && (
         <div className="flex-shrink-0">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 p-0.5">
-            <div className="w-full h-full bg-white rounded-full flex items-center justify-center">
-              <img
-                src="/src/imports/image.png"
-                alt="UPi"
-                className="w-7 h-7 object-contain"
-              />
-            </div>
+          <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-white shadow-md bg-slate-900">
+            <img
+              src="/src/imports/image-2.png"
+              alt="UPi"
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
       )}
