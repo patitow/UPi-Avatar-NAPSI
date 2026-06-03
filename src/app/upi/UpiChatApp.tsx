@@ -164,7 +164,7 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
         ]);
 
         triggerReact(responseEmotion);
-        speak(responseText);
+        speak(responseText, typeof data.audio === "string" ? data.audio : null);
         setApiStatus("online");
         a11y.announceStatus("UPi respondeu");
       } catch {
@@ -262,6 +262,39 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
 
           <div className={styles.headerActions}>
             <div className={styles.desktopActions}>
+            <button
+              type="button"
+              className={`${styles.headerBtn} ${a11y.highContrast ? styles.contrastActive : ""}`}
+              onClick={() =>
+                a11y.setHighContrast((v) => {
+                  const next = !v;
+                  a11y.announceStatus(
+                    next ? "Alto contraste ativado" : "Alto contraste desativado",
+                  );
+                  return next;
+                })
+              }
+              title="Alto contraste (Alt+C)"
+              aria-label={
+                a11y.highContrast
+                  ? "Desativar alto contraste"
+                  : "Ativar alto contraste"
+              }
+              aria-pressed={a11y.highContrast}
+            >
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+                <path
+                  d="M12 3v18M3 12h18"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+              </svg>
+              <span>
+                {a11y.highContrast ? "Contraste ativo" : "Alto contraste"}
+              </span>
+            </button>
+
             {voiceSupported && (
               <button
                 type="button"
@@ -410,6 +443,19 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
                   role="menu"
                   aria-label="Menu principal"
                 >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={styles.mobileMenuItem}
+                    onClick={() => {
+                      a11y.setHighContrast((v) => !v);
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    {a11y.highContrast
+                      ? "Desativar alto contraste"
+                      : "Ativar alto contraste"}
+                  </button>
                   {voiceSupported && (
                     <button
                       type="button"

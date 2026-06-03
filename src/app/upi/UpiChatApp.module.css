@@ -282,6 +282,12 @@
   background: rgba(248, 113, 113, 0.3);
 }
 
+.contrastActive {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold);
+}
+
 .body {
   flex: 1;
   display: flex;
@@ -692,6 +698,12 @@
 :global(html.high-contrast) .voiceBtn:focus-visible {
   outline: 2px solid #ffff00;
   outline-offset: 2px;
+}
+
+:global(html.high-contrast) .contrastActive {
+  background: #ffff00;
+  color: #000000;
+  border-color: #000000;
 }
 
 :global(html.high-contrast) .voiceMuted {

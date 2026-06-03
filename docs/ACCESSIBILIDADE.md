@@ -28,7 +28,8 @@ Documento de referência alinhado às boas práticas **WCAG 2.2** (nível alvo: 
 
 | Critério | Implementação |
 |----------|----------------|
-| Leitura de voz (TTS) | Web Speech API, sotaque pernambucano (`pernambucanize`) |
+| Leitura de voz (TTS) | Prioridade: áudio gTTS do servidor → Web Speech por plataforma (`speechStrategy.ts`) |
+| Alto contraste | Botão no header + modal + Alt+C; respeita `prefers-contrast: more` |
 | Status da API | `aria-live` + anúncio explícito online/offline |
 | Mensagens do chat | `role="log"` com `aria-live="polite"` |
 
@@ -48,6 +49,37 @@ Documento de referência alinhado às boas práticas **WCAG 2.2** (nível alvo: 
 4. **Persistência**: alterar fonte/voz/contraste, recarregar página (F5) e confirmar que mantém.
 5. **Modais**: abrir Sobre/Acessibilidade, Tab não deve sair para o fundo; Esc fecha e devolve foco.
 
+## Alto contraste — padrão de mercado
+
+**O que é comum:** controle visível na barra principal (ícone ou texto), preferência do sistema (`prefers-contrast`), persistência local, e painel de acessibilidade com o mesmo estado. Toggle com `role="switch"` e `aria-checked` (WAI-ARIA APG).
+
+**O que o UPi faz hoje:** toggle no modal, atalho Alt+C, botão no header e no menu mobile, sincronização com `prefers-contrast: more`, paleta dedicada `html.high-contrast`.
+
+**Lacunas vs. referências (GOV.UK, BBC, Microsoft, WCAG 2.2):**
+
+| Prática comum | Situação no UPi |
+|---------------|-----------------|
+| Barra de acessibilidade fixa em todas as páginas | Parcial — header no chat; login sem botão dedicado |
+| `@media (forced-colors: active)` (modo alto contraste do Windows) | Não mapeado — tema próprio pode conflitar com paleta do SO |
+| Contraste AA no tema **normal** (4.5:1 texto) | Não auditado formalmente (axe/Lighthouse) |
+| Página / link “Declaração de acessibilidade” | Ausente |
+| Atalhos Alt+* | Útil, mas Alt pode colidir com menus do SO/navegador |
+| `prefers-contrast: less/custom` | Só `more` é considerado |
+
+## TTS — estratégia multiplataforma
+
+Ordem de prioridade (implementada em `src/utils/speechStrategy.ts` + `useSpeech.ts`):
+
+1. **Áudio MP3 do backend (gTTS, pt-BR)** quando `/chat` retorna `audio` — melhor opção em Chrome, Edge, Firefox, Brave, Safari, iOS e Android (após gesto do usuário ao enviar mensagem).
+2. **Fallback Web Speech API** com voz e parâmetros por plataforma:
+   - **iOS / Safari:** voz pt-BR padrão, sem `pernambucanize` no TTS, texto em blocos curtos.
+   - **Android Chrome:** voz Google Português (Brasil), preferência por voz em nuvem quando existir.
+   - **Desktop Chromium / Edge / Brave:** vozes Flo, Google pt-BR ou Microsoft online/neural (`localService: false`).
+   - **Firefox:** melhor voz pt disponível localmente.
+3. **Leitores de tela (NVDA, VoiceOver, TalkBack):** com voz do UPi ligada, pode haver dupla leitura com `aria-live`. Quem usa SR deve **desativar “Voz do UPi”** no modal de acessibilidade.
+
+**Limitações inevitáveis:** qualidade do browser TTS depende do SO; iOS tem poucas vozes; autoplay de áudio exige interação; offline só tem voz local.
+
 ## Pendências conhecidas (pós-MVP)
 
 - Auditoria automatizada (axe, Lighthouse) em CI.
@@ -57,6 +89,8 @@ Documento de referência alinhado às boas práticas **WCAG 2.2** (nível alvo: 
 
 ## Arquivos principais
 
+- `src/utils/speechStrategy.ts` — perfil TTS por navegador/SO
+- `src/hooks/useSpeech.ts` — servidor + fallback browser
 - `src/hooks/useAccessibility.ts` — preferências, atalhos, anúncios
 - `src/hooks/useFocusTrap.ts` / `useModalFocus.ts` — modais
 - `src/utils/a11yStorage.ts` — persistência

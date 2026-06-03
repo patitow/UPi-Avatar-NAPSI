@@ -107,10 +107,11 @@ export function SettingsModal({
                       </span>
                       <button
                         type="button"
+                        role="switch"
                         onClick={() => setHighContrast(!highContrast)}
                         className={`w-12 h-6 rounded-full transition-all relative ${highContrast ? s.toggleTrackOn : s.toggleTrackOff}`}
-                        aria-pressed={highContrast}
-                        aria-label="Alternar alto contraste"
+                        aria-checked={highContrast}
+                        aria-label="Alto contraste"
                       >
                         <div
                           className={`absolute top-1 w-4 h-4 rounded-full transition-all ${s.toggleThumb} ${highContrast ? "left-7" : "left-1"}`}
@@ -134,10 +135,11 @@ export function SettingsModal({
                     </div>
                     <button
                       type="button"
+                      role="switch"
                       onClick={() => setVoiceEnabled(!voiceEnabled)}
                       className={`w-12 h-6 rounded-full transition-all relative ${voiceEnabled ? s.toggleTrackOn : s.toggleTrackOff}`}
-                      aria-pressed={voiceEnabled}
-                      aria-label="Alternar leitura de voz"
+                      aria-checked={voiceEnabled}
+                      aria-label="Leitura de voz do UPi"
                     >
                       <div
                         className={`absolute top-1 w-4 h-4 rounded-full transition-all ${s.toggleThumb} ${voiceEnabled ? "left-7" : "left-1"}`}
