@@ -27,12 +27,6 @@ const QUICK_QUESTIONS = [
 
 type ApiStatus = "online" | "offline" | "checking";
 
-interface AiModeInfo {
-  provider?: string;
-  model?: string;
-  vectorStore?: string;
-}
-
 interface UpiChatAppProps {
   a11y: AccessibilityApi;
   onLogout?: () => void;
@@ -47,7 +41,6 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isReacting, setIsReacting] = useState(false);
   const [apiStatus, setApiStatus] = useState<ApiStatus>("checking");
-  const [aiMode, setAiMode] = useState<AiModeInfo | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -64,15 +57,8 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
   useEffect(() => {
     fetch(`${API_URL}/health`)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((data: Record<string, string>) => {
-        setApiStatus("online");
-        const store = data.vector_store ?? "—";
-        setAiMode({
-          provider:
-            data.llm_provider ?? (store === "pgvector" ? "ollama" : "cloud"),
-          model: data.llm_model ?? "ativo",
-          vectorStore: store,
-        });
+      .then((data: { ok?: boolean }) => {
+        setApiStatus(data?.ok ? "online" : "offline");
       })
       .catch(() => setApiStatus("offline"));
   }, []);
@@ -205,19 +191,10 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
     a11y.announceStatus("Nova conversa iniciada");
   };
 
-  const modeLabel = aiMode
-    ? aiMode.provider === "ollama"
-      ? `IA Local · ${aiMode.model}`
-      : `IA Cloud · ${aiMode.model}`
-    : null;
-
   const statusLabel = {
     online: {
-      text: modeLabel ?? "API conectada",
-      cls:
-        aiMode?.provider === "ollama"
-          ? styles.statusLocal
-          : styles.statusOnline,
+      text: "UPi online",
+      cls: styles.statusOnline,
     },
     offline: { text: "API offline", cls: styles.statusOffline },
     checking: { text: "Verificando...", cls: styles.statusChecking },
@@ -543,28 +520,6 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
               </li>
             </ul>
           </div>
-
-          {aiMode && (
-            <div
-              className={`${styles.infoBox} ${aiMode.provider === "ollama" ? styles.modeLocal : styles.modeCloud}`}
-            >
-              <p className={styles.infoTitle}>IA em uso</p>
-              <ul className={styles.infoList}>
-                <li>
-                  {aiMode.provider === "ollama"
-                    ? "🖥️ Local (Ollama)"
-                    : "☁️ Cloud (OpenAI)"}
-                </li>
-                <li>🤖 {aiMode.model}</li>
-                <li>
-                  🗄️{" "}
-                  {aiMode.vectorStore === "pgvector"
-                    ? "PostgreSQL (pgvector)"
-                    : aiMode.vectorStore}
-                </li>
-              </ul>
-            </div>
-          )}
 
           <button type="button" className={styles.clearBtn} onClick={handleClear}>
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
