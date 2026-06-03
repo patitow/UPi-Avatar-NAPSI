@@ -87,3 +87,50 @@
   margin-top: 7px;
   padding-left: 4px;
 }
+
+/* Alto contraste */
+:global(html.high-contrast) .bar {
+  background: #000000;
+  border-top-color: #ffffff;
+}
+
+:global(html.high-contrast) .inputWrap {
+  background: #000000;
+  border: 2px solid #ffffff;
+  box-shadow: none;
+}
+
+:global(html.high-contrast) .inputWrap:focus-within {
+  border-color: #ffff00;
+  box-shadow: none;
+  background: #000000;
+}
+
+:global(html.high-contrast) .textarea {
+  color: #ffffff;
+  outline: none;
+}
+
+:global(html.high-contrast) .textarea::placeholder {
+  color: #b0b0b0;
+}
+
+:global(html.high-contrast) .sendBtn {
+  background: #ffff00;
+  color: #000000;
+  border: 2px solid #ffffff;
+}
+
+:global(html.high-contrast) .sendBtn:hover:not(:disabled) {
+  background: #ffffff;
+  color: #000000;
+}
+
+:global(html.high-contrast) .sendBtn:focus-visible {
+  outline: 2px solid #ffff00;
+  outline-offset: 2px;
+}
+
+:global(html.high-contrast) .hint {
+  color: #e0e0e0;
+}

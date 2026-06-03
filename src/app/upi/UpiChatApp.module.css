@@ -72,6 +72,86 @@
   flex-shrink: 0;
   flex-wrap: wrap;
   justify-content: flex-end;
+  position: relative;
+}
+
+.desktopActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mobileMenuWrap {
+  display: none;
+  position: relative;
+}
+
+.mobileMenuBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobileMenuBtn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.mobileMenuBtn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.mobileMenuPanel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  background: var(--white);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: 8px;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mobileMenuItem {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--gray-900);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.mobileMenuItem:hover {
+  background: var(--blue-50);
+}
+
+.mobileMenuItem:focus-visible {
+  outline: 2px solid var(--blue-500);
+  outline-offset: 1px;
+}
+
+.mobileMenuStatus {
+  font-size: 12px;
+  color: var(--gray-700);
+  padding: 8px 12px 4px;
+  margin: 0;
+  border-top: 1px solid var(--gray-200);
 }
 
 .apiStatus {
@@ -523,14 +603,38 @@
   .headerSub {
     display: none;
   }
-  .headerBtn span,
-  .limitBtn span,
-  .voiceBtn span {
+
+  .desktopActions {
     display: none;
   }
-  .apiStatus {
-    display: none;
+
+  .mobileMenuWrap {
+    display: block;
   }
+}
+
+:global(html.high-contrast) .mobileMenuPanel {
+  background: #000000;
+  border-color: #ffffff;
+}
+
+:global(html.high-contrast) .mobileMenuItem {
+  color: #ffffff;
+}
+
+:global(html.high-contrast) .mobileMenuItem:hover {
+  background: #1a1a1a;
+  color: #ffff00;
+}
+
+:global(html.high-contrast) .mobileMenuStatus {
+  color: #ffffff;
+  border-top-color: #ffffff;
+}
+
+:global(html.high-contrast) .mobileMenuBtn {
+  border-color: #ffffff;
+  background: #000000;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -542,4 +646,159 @@
   .dot {
     animation: none;
   }
+}
+
+/* ── Alto contraste (preto/branco/amarelo, sem inverter tokens) ── */
+:global(html.high-contrast) .layout {
+  background: #000000;
+}
+
+:global(html.high-contrast) .header {
+  background: #000000;
+  color: #ffffff;
+  border-bottom: 2px solid #ffffff;
+  box-shadow: none;
+}
+
+:global(html.high-contrast) .headerLogoBox {
+  background: #ffff00;
+  border: 2px solid #ffffff;
+}
+
+:global(html.high-contrast) .headerLogoText {
+  color: #000000;
+}
+
+:global(html.high-contrast) .headerSub {
+  opacity: 1;
+  color: #e0e0e0;
+}
+
+:global(html.high-contrast) .headerBtn,
+:global(html.high-contrast) .voiceBtn {
+  background: #000000;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  outline: none;
+}
+
+:global(html.high-contrast) .headerBtn:hover,
+:global(html.high-contrast) .voiceBtn:hover {
+  background: #1a1a1a;
+  color: #ffff00;
+}
+
+:global(html.high-contrast) .headerBtn:focus-visible,
+:global(html.high-contrast) .voiceBtn:focus-visible {
+  outline: 2px solid #ffff00;
+  outline-offset: 2px;
+}
+
+:global(html.high-contrast) .voiceMuted {
+  background: #000000;
+  color: #ffff00;
+  border-color: #ffff00;
+}
+
+:global(html.high-contrast) .apiStatus {
+  background: #000000 !important;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  opacity: 1;
+}
+
+:global(html.high-contrast) .apiDot {
+  background: #ffff00 !important;
+  box-shadow: none !important;
+}
+
+:global(html.high-contrast) .chat {
+  background: #000000;
+  border: 2px solid #ffffff;
+}
+
+:global(html.high-contrast) .avatarCard,
+:global(html.high-contrast) .infoBox {
+  background: #000000;
+  border: 2px solid #ffffff;
+  box-shadow: none;
+}
+
+:global(html.high-contrast) .avatarName,
+:global(html.high-contrast) .infoTitle,
+:global(html.high-contrast) .infoList li {
+  color: #ffffff;
+}
+
+:global(html.high-contrast) .infoList a {
+  color: #00e5ff;
+  text-decoration: underline;
+}
+
+:global(html.high-contrast) .modeLocal,
+:global(html.high-contrast) .modeCloud {
+  background: #000000;
+  border-left: 3px solid #ffff00;
+}
+
+:global(html.high-contrast) .avatarStatus,
+:global(html.high-contrast) .statusOnlineBadge,
+:global(html.high-contrast) .statusThinking,
+:global(html.high-contrast) .statusSpeaking {
+  background: #000000;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+}
+
+:global(html.high-contrast) .clearBtn,
+:global(html.high-contrast) .clearBtnMobile {
+  background: #000000;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+}
+
+:global(html.high-contrast) .clearBtn:hover,
+:global(html.high-contrast) .clearBtnMobile:hover {
+  background: #1a1a1a;
+  color: #ffff00;
+}
+
+:global(html.high-contrast) .chatTopBar {
+  border-bottom-color: #ffffff;
+}
+
+:global(html.high-contrast) .messages:focus-visible {
+  box-shadow: inset 0 0 0 2px #ffff00;
+}
+
+:global(html.high-contrast) .typingBubble {
+  background: #000000;
+  border: 2px solid #ffffff;
+}
+
+:global(html.high-contrast) .dot {
+  background: #ffffff;
+}
+
+:global(html.high-contrast) .quickLabel {
+  color: #ffff00;
+}
+
+:global(html.high-contrast) .quickBtn {
+  background: #000000;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  outline: none;
+  box-shadow: none;
+}
+
+:global(html.high-contrast) .quickBtn:hover:not(:disabled) {
+  background: #1a1a1a;
+  color: #ffff00;
+  border-color: #ffff00;
+}
+
+:global(html.high-contrast) .quickBtn:focus-visible {
+  outline: 2px solid #ffff00;
+  outline-offset: 2px;
 }

@@ -2,11 +2,10 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { UpiAvatar } from "./UpiAvatar";
 import { ChatMessage, type UpiChatMessage } from "./ChatMessage";
 import { ChatInputBar } from "./ChatInputBar";
-import { LimitacoesModal } from "./LimitacoesModal";
 import { SettingsModal } from "../components/SettingsModal";
 import { InfoModal } from "../components/InfoModal";
 import { useSpeech } from "../../hooks/useSpeech";
-import { useAccessibility } from "../../hooks/useAccessibility";
+import type { AccessibilityApi } from "../../hooks/useAccessibility";
 import styles from "./UpiChatApp.module.css";
 
 const API_URL = "/api";
@@ -34,7 +33,12 @@ interface AiModeInfo {
   vectorStore?: string;
 }
 
-export function UpiChatApp() {
+interface UpiChatAppProps {
+  a11y: AccessibilityApi;
+  onLogout?: () => void;
+}
+
+export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
   const [messages, setMessages] = useState<UpiChatMessage[]>([
     WELCOME_MESSAGE,
   ]);
@@ -42,14 +46,13 @@ export function UpiChatApp() {
   const [loading, setLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isReacting, setIsReacting] = useState(false);
-  const [showLimitacoes, setShowLimitacoes] = useState(false);
   const [apiStatus, setApiStatus] = useState<ApiStatus>("checking");
   const [aiMode, setAiMode] = useState<AiModeInfo | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const reactTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const a11y = useAccessibility();
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   const { speak, stop, supported: voiceSupported } = useSpeech({
     enabled: a11y.voiceEnabled,
@@ -72,6 +75,36 @@ export function UpiChatApp() {
       })
       .catch(() => setApiStatus("offline"));
   }, []);
+
+  const prevApiStatus = useRef<ApiStatus>("checking");
+  useEffect(() => {
+    if (apiStatus === "checking") return;
+    if (prevApiStatus.current === apiStatus) return;
+    prevApiStatus.current = apiStatus;
+    if (apiStatus === "online") {
+      a11y.announceStatus(
+        "Conexão com a API do UPi estabelecida. O chat está pronto para uso.",
+      );
+    } else {
+      a11y.announceError(
+        "API do UPi offline. Inicie o backend na porta 8000 para enviar mensagens.",
+      );
+    }
+  }, [apiStatus, a11y]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(e.target as Node)
+      ) {
+        setMobileMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({
@@ -230,6 +263,7 @@ export function UpiChatApp() {
           </div>
 
           <div className={styles.headerActions}>
+            <div className={styles.desktopActions}>
             {voiceSupported && (
               <button
                 type="button"
@@ -241,7 +275,9 @@ export function UpiChatApp() {
                     : "Ativar voz do UPi"
                 }
                 aria-label={
-                  a11y.voiceEnabled ? "Silenciar voz" : "Ativar voz"
+                  a11y.voiceEnabled
+                    ? "Silenciar leitura de voz do UPi"
+                    : "Ativar leitura de voz do UPi"
                 }
                 aria-pressed={a11y.voiceEnabled}
               >
@@ -285,9 +321,11 @@ export function UpiChatApp() {
             <button
               type="button"
               className={styles.headerBtn}
-              onClick={() => a11y.setShowSettings(true)}
+              onClick={(e) =>
+                a11y.openSettings(e.currentTarget)
+              }
               title="Acessibilidade (Alt+A)"
-              aria-label="Configurações de acessibilidade"
+              aria-label="Abrir configurações de acessibilidade"
             >
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
@@ -304,9 +342,9 @@ export function UpiChatApp() {
             <button
               type="button"
               className={styles.headerBtn}
-              onClick={() => a11y.setShowInfo(true)}
+              onClick={(e) => a11y.openInfo(e.currentTarget)}
               title="Sobre o UPi (Alt+I)"
-              aria-label="Sobre o UPi e o NAPSI"
+              aria-label="Abrir informações sobre o UPi e o NAPSI"
             >
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
@@ -317,30 +355,117 @@ export function UpiChatApp() {
 
             <span
               className={`${styles.apiStatus} ${statusLabel.cls}`}
-              role="status"
-              aria-live="polite"
+              aria-label={`Estado da API: ${statusLabel.text}`}
             >
               <span className={styles.apiDot} aria-hidden="true" />
-              {statusLabel.text}
+              <span aria-hidden="true">{statusLabel.text}</span>
             </span>
 
-            <button
-              type="button"
-              className={styles.headerBtn}
-              onClick={() => setShowLimitacoes(true)}
-              title="Ver limitações conhecidas do sistema"
-            >
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                <path
-                  d="M12 8v4M12 16h.01"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <span>Limitações</span>
-            </button>
+            {onLogout && (
+              <button
+                type="button"
+                className={styles.headerBtn}
+                onClick={onLogout}
+                aria-label="Sair do UPi e voltar à tela de login"
+              >
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>Sair</span>
+              </button>
+            )}
+            </div>
+
+            <div className={styles.mobileMenuWrap} ref={mobileMenuRef}>
+              <button
+                type="button"
+                className={styles.mobileMenuBtn}
+                onClick={() => setMobileMenuOpen((o) => !o)}
+                aria-expanded={mobileMenuOpen}
+                aria-haspopup="true"
+                aria-controls="mobile-menu-panel"
+                aria-label={
+                  mobileMenuOpen
+                    ? "Fechar menu de opções"
+                    : "Abrir menu de opções do UPi"
+                }
+              >
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M4 7h16M4 12h16M4 17h16"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+              {mobileMenuOpen && (
+                <div
+                  id="mobile-menu-panel"
+                  className={styles.mobileMenuPanel}
+                  role="menu"
+                  aria-label="Menu principal"
+                >
+                  {voiceSupported && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className={styles.mobileMenuItem}
+                      onClick={() => {
+                        a11y.setVoiceEnabled((v) => !v);
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      {a11y.voiceEnabled ? "Silenciar voz do UPi" : "Ativar voz do UPi"}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={styles.mobileMenuItem}
+                    onClick={(e) => {
+                      a11y.openSettings(e.currentTarget);
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    Acessibilidade
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={styles.mobileMenuItem}
+                    onClick={(e) => {
+                      a11y.openInfo(e.currentTarget);
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    Sobre o UPi
+                  </button>
+                  <p className={styles.mobileMenuStatus} role="status">
+                    API: {statusLabel.text}
+                  </p>
+                  {onLogout && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className={styles.mobileMenuItem}
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        onLogout();
+                      }}
+                    >
+                      Sair
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -505,14 +630,9 @@ export function UpiChatApp() {
         </main>
       </div>
 
-      <LimitacoesModal
-        open={showLimitacoes}
-        onClose={() => setShowLimitacoes(false)}
-      />
-
       <SettingsModal
         isOpen={a11y.showSettings}
-        onClose={() => a11y.setShowSettings(false)}
+        onClose={a11y.closeSettings}
         fontSize={a11y.fontSize}
         setFontSize={a11y.setFontSize}
         voiceEnabled={a11y.voiceEnabled}
@@ -525,7 +645,8 @@ export function UpiChatApp() {
 
       <InfoModal
         isOpen={a11y.showInfo}
-        onClose={() => a11y.setShowInfo(false)}
+        onClose={a11y.closeInfo}
+        highContrast={a11y.highContrast}
       />
     </div>
   );

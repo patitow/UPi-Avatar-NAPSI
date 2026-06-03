@@ -1,4 +1,4 @@
-@import './upi-tokens.css';
-@import './fonts.css';
+/* @import sempre antes de regras CSS — upi-tokens por último */
 @import './tailwind.css';
 @import './theme.css';
+@import './upi-tokens.css';

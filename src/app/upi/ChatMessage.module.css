@@ -96,3 +96,41 @@
     animation: none;
   }
 }
+
+/* Alto contraste */
+:global(html.high-contrast) .bubbleUpi {
+  background: #000000;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+}
+
+:global(html.high-contrast) .bubbleUser {
+  background: #ffffff;
+  color: #000000;
+  border: 2px solid #000000;
+}
+
+:global(html.high-contrast) .bubbleError {
+  background: #000000;
+  color: #ffff00;
+  border: 2px solid #ffff00;
+}
+
+:global(html.high-contrast) .senderLabel {
+  color: #ffff00;
+}
+
+:global(html.high-contrast) .avatar {
+  background: #000000;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+}
+
+:global(html.high-contrast) .time {
+  opacity: 1;
+  color: inherit;
+}
+
+:global(html.high-contrast) .bubbleUser .time {
+  color: #000000;
+}

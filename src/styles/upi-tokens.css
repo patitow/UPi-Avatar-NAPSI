@@ -36,26 +36,11 @@
   --chat-font-size: 15px;
 }
 
-html.high-contrast button,
-html.high-contrast textarea,
-html.high-contrast a {
-  outline: 2px solid #ffffff !important;
-  outline-offset: 1px;
-}
-
-html.high-contrast {
-  --blue-900: #000000;
-  --blue-700: #000000;
-  --blue-500: #ffffff;
-  --blue-100: #000000;
-  --blue-50: #000000;
-  --gray-900: #ffffff;
-  --gray-700: #ffffff;
-  --gray-400: #ffffff;
-  --gray-200: #ffffff;
-  --gray-100: #000000;
-  --gray-50: #000000;
-  --white: #000000;
+/* Alto contraste: estilos por componente nos .module.css (evita inverter tokens globalmente) */
+html.high-contrast,
+html.high-contrast body {
+  background: #000000;
+  color: #ffffff;
 }
 
 html.font-large {
