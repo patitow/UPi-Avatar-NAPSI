@@ -11,6 +11,8 @@ import { ScrollToBottom } from "./ScrollToBottom";
 import { StatusIndicator } from "./StatusIndicator";
 import { InfoModal } from "./InfoModal";
 import { SettingsModal } from "./SettingsModal";
+import { useSpeech } from "../../hooks/useSpeech";
+import { mapBackendEmotion } from "../../utils/mapEmotion";
 
 interface ChatInterfaceProps {
   onLogout: () => void;
@@ -37,6 +39,14 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
   const [fontSize, setFontSize] = useState<"normal" | "large" | "extra-large">("normal");
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [voiceSpeed, setVoiceSpeed] = useState(1);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  const { speak } = useSpeech({
+    enabled: voiceEnabled,
+    rate: voiceSpeed * 0.84,
+    onStart: () => setIsSpeaking(true),
+    onEnd: () => setIsSpeaking(false),
+  });
 
   const [statusAnnouncement, setStatusAnnouncement] = useState("");
   const [errorAnnouncement, setErrorAnnouncement] = useState("");
@@ -94,15 +104,6 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
       window.removeEventListener("resize", resize);
     };
   }, [prefersReducedMotion, highContrast]);
-
-  const speakMessage = (text: string) => {
-    if (!voiceEnabled) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "pt-BR";
-    utterance.rate = voiceSpeed;
-    window.speechSynthesis.speak(utterance);
-  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({
@@ -209,8 +210,7 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
       if (!response.ok) throw new Error("Falha na comunicação com o UPi");
 
       const data = await response.json();
-      const emotion = data.emotion as AvatarState;
-      setAvatarState(emotion || "talking");
+      setAvatarState(mapBackendEmotion(data.emotion));
 
       const upiMessage: Message = {
         id: Date.now().toString(),
@@ -221,7 +221,7 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
 
       setMessages((prev) => [...prev, upiMessage]);
       setStatusAnnouncement("UPi respondeu.");
-      speakMessage(data.response);
+      speak(data.response);
 
     } catch (error) {
       console.error("Error:", error);
@@ -240,7 +240,7 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
       setIsTyping(false);
       setTimeout(() => setAvatarState("idle"), 3000);
     }
-  }, [voiceEnabled, voiceSpeed]);
+  }, [speak]);
 
   const fadeIn = prefersReducedMotion
     ? {}
@@ -518,7 +518,11 @@ export function ChatInterface({ onLogout }: ChatInterfaceProps) {
             }`}
             style={{ transition: "box-shadow 0.4s ease" }}
           >
-            <AvatarDisplay state={avatarState} />
+            <AvatarDisplay
+              state={avatarState}
+              isSpeaking={isSpeaking}
+              isLoading={isTyping}
+            />
           </div>
         </motion.div>
 

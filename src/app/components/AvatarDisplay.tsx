@@ -1,4 +1,4 @@
-import { motion } from "framer-motion"; // Ajustado para o padrão do framer-motion
+import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 
 export type AvatarState =
@@ -10,83 +10,104 @@ export type AvatarState =
 
 interface AvatarDisplayProps {
   state: AvatarState;
+  isSpeaking?: boolean;
+  isLoading?: boolean;
   isLoginScreen?: boolean;
 }
 
-const stateToAsset: Record<AvatarState, string> = {
-  idle: "/assets/static_sprites/showing_computer_idle.png",
-  thinking: "/assets/static_sprites/thinking.png",
-  talking: "/assets/animated_sprites/falando.mp4",
-  happy: "/assets/animated_sprites/celebrating.gif",
-  surprised: "/assets/animated_sprites/unsure.gif",
-};
+const ASSETS = {
+  idle: "/assets/avatar_idle.jpeg",
+  thinking: "/assets/avatar_pensando.jpeg",
+  interacting: "/assets/avatar_interagindo.jpeg",
+  video: "/assets/avatar_falando.mp4",
+} as const;
 
-export function AvatarDisplay({ state, isLoginScreen }: AvatarDisplayProps) {
-  const assetUrl = stateToAsset[state] ?? stateToAsset.idle;
-  const isVideo = assetUrl.endsWith(".mp4");
+function getImageSrc(
+  state: AvatarState,
+  isLoading: boolean,
+): string {
+  if (isLoading || state === "thinking") return ASSETS.thinking;
+  if (state === "happy" || state === "surprised") return ASSETS.interacting;
+  return ASSETS.idle;
+}
+
+export function AvatarDisplay({
+  state,
+  isSpeaking = false,
+  isLoading = false,
+  isLoginScreen,
+}: AvatarDisplayProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-
-  // Console log mantido de forma limpa dentro do escopo correto
-  console.log("🎬 AvatarDisplay render:", { state, assetUrl, isVideo });
+  const imageSrc = getImageSrc(state, isLoading);
 
   useEffect(() => {
-    if (!isVideo || !videoRef.current) return;
-    videoRef.current.load();
-    videoRef.current.play().catch(() => {});
-  }, [assetUrl, isVideo]);
+    const video = videoRef.current;
+    if (!video) return;
+    if (isSpeaking) {
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+      video.currentTime = 0;
+    }
+  }, [isSpeaking]);
 
-  const mediaElement = isVideo ? (
-    <video
-      ref={videoRef}
-      key={assetUrl}
-      src={assetUrl}
-      autoPlay
-      muted
-      loop
-      playsInline
-      preload="auto"
-      style={{
-        display: "block",
-        width: "100%",
-        height: "100%",
-        objectFit: "contain",
-         mixBlendMode: "multiply", // ← adiciona isso
-      }}
-    />
-  ) : (
-    <img
-      key={assetUrl}
-      src={assetUrl}
-      alt=""
-      style={{
-        display: "block",
-        width: "100%",
-        height: "100%",
-        objectFit: "contain",
-      }}
-    />
-  );
+  const stateLabel = isLoading
+    ? "pensando"
+    : isSpeaking
+      ? "falando"
+      : state;
 
   return (
     <motion.div
-      aria-label={`Avatar UPi – ${state}`}
+      aria-label={`Avatar UPi – ${stateLabel}`}
+      role="img"
       animate={{
         y: state === "idle" || isLoginScreen ? [0, -8, 0] : 0,
-        rotate: state === "thinking" ? [0, -5, 5, -5, 0] : 0,
+        rotate: state === "thinking" || isLoading ? [0, -5, 5, -5, 0] : 0,
       }}
       transition={{
         duration: state === "idle" || isLoginScreen ? 3 : 2,
         repeat: Infinity,
         ease: "easeInOut",
       }}
-      style={{ width: "100%", height: "100%" }}
+      style={{ width: "100%", height: "100%", position: "relative" }}
       className={
         isLoginScreen
           ? "rounded-full overflow-hidden bg-white shadow-inner border-4 border-white"
           : "drop-shadow-2xl"
       }
     >
-      {mediaElement}
+      <video
+        ref={videoRef}
+        src={ASSETS.video}
+        muted
+        loop
+        playsInline
+        preload="auto"
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+          opacity: isSpeaking ? 1 : 0,
+          transition: "opacity 0.2s ease",
+        }}
+      />
+      <img
+        src={imageSrc}
+        alt=""
+        draggable={false}
+        style={{
+          display: "block",
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+          opacity: isSpeaking ? 0 : 1,
+          transition: "opacity 0.2s ease",
+        }}
+      />
     </motion.div>
   );
 }
