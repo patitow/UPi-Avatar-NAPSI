@@ -12,3 +12,5 @@ npm install
 npx playwright install chromium
 npm run test:e2e
 ```
+
+Os testes de chat validam intenções (local, TEA, agendamento) quando a API está no ar.

@@ -18,6 +18,20 @@ const WELCOME_MESSAGE: UpiChatMessage = {
   time: new Date(),
 };
 
+const MAX_HISTORY_TURNS = 10;
+
+function buildChatHistory(
+  messages: UpiChatMessage[],
+): { role: "user" | "assistant"; content: string }[] {
+  return messages
+    .filter((m) => m.id !== "welcome" && !m.isError && m.text.trim())
+    .slice(-MAX_HISTORY_TURNS)
+    .map((m) => ({
+      role: m.from === "user" ? ("user" as const) : ("assistant" as const),
+      content: m.text.trim(),
+    }));
+}
+
 const QUICK_QUESTIONS = [
   "Como agendar um atendimento?",
   "Onde fica o NAPSI?",
@@ -113,12 +127,14 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
       if (!text.trim() || loading) return;
 
       stop();
+      const trimmed = text.trim();
+      const chatHistory = buildChatHistory(messages);
       setMessages((prev) => [
         ...prev,
         {
           id: String(Date.now()),
           from: "user",
-          text: text.trim(),
+          text: trimmed,
           time: new Date(),
         },
       ]);
@@ -130,7 +146,7 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
         const res = await fetch(`${API_URL}/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: text.trim() }),
+          body: JSON.stringify({ message: trimmed, chat_history: chatHistory }),
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -156,7 +172,7 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
         a11y.announceStatus("UPi respondeu");
       } catch {
         const errText =
-          "Não tô conseguindo me conectar ao sistema do UPi, tenta de novo em instantes, ou entra em contato com o NAPSI pelo e-mail napsi@poli.upe.br.";
+          "Não estou conseguindo me conectar ao sistema do UPi. Tente de novo em instantes ou entre em contato com o NAPSI pelo e-mail napsi@poli.upe.br.";
         setMessages((prev) => [
           ...prev,
           {

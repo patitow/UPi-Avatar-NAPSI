@@ -27,4 +27,14 @@ test.describe("UPi — chat (API ligada)", () => {
     expect(/\blindo\b|\blinda\b/i.test(reply)).toBeFalsy();
     expect(/seja bem-vindo/i.test(reply)).toBeFalsy();
   });
+
+  test("pergunta rápida: TEA menciona autismo", async ({ page }) => {
+    const reply = await clickQuickQuestion(
+      page,
+      "O NAPSI apoia alunos com TEA?",
+    );
+    const lower = reply.toLowerCase();
+    expect(/tea|autis|espectro/.test(lower)).toBeTruthy();
+    expect(/tempo\s+extraordin/i.test(lower)).toBeFalsy();
+  });
 });

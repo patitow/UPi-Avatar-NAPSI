@@ -9,7 +9,7 @@ Interface web interativa para o UPi, o assistente virtual do Núcleo de Apoio Ps
   - **Ajuste de Fonte**: Suporte a tamanhos Normal, Grande e Extra Grande.
   - **Text-to-Speech (TTS)**: Leitura das respostas com controle de velocidade (0.5x a 2.0x).
 - **Interface Low Cognitive Load**: Design limpo e intuitivo projetado para reduzir a sobrecarga sensorial, ideal para usuários com TEA.
-- **Integração Real-Time**: Comunicação via WebSocket/HTTP com o motor de IA.
+- **Integração com a API**: Chat em `src/app/upi/UpiChatApp.tsx` via HTTP (`POST /api/chat`, proxy Vite → backend na porta 8000).
 
 ## 🚀 Tecnologias
 
@@ -38,6 +38,8 @@ Interface web interativa para o UPi, o assistente virtual do Núcleo de Apoio Ps
    copy .env.example .env
    ```
    O chat usa o proxy `/api` → `http://localhost:8000` (ver `vite.config.ts`). Nenhum script do repo apaga ou reescreve o seu `.env`.
+
+3. Suba o backend (`UPi-Avatar-NAPSI-backend`, porta **8000**) antes de usar o chat — ver README do backend.
 
 ## ⚙️ Execução
 
