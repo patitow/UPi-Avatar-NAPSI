@@ -37,4 +37,25 @@ test.describe("UPi — chat (API ligada)", () => {
     expect(/tea|autis|espectro/.test(lower)).toBeTruthy();
     expect(/tempo\s+extraordin/i.test(lower)).toBeFalsy();
   });
+
+  test("mal-estar acolhe e direciona ao NAPSI", async ({ page }) => {
+    await sendChatMessage(page, "Estou me sentindo mal, me ajude");
+    const reply = await waitForUpiReply(page);
+    const lower = reply.toLowerCase();
+    expect(lower).not.toContain("fora da minha área");
+    expect(/napsi|napsi@poli|bloco|psicol|acolh|ajud|192|samu/.test(lower)).toBeTruthy();
+  });
+
+  test("fluxo TEA exibe perguntas de continuação", async ({ page }) => {
+    await clickQuickQuestion(page, "O NAPSI apoia alunos com TEA?");
+    await waitForUpiReply(page);
+    const followUp = page.getByRole("button", {
+      name: "Como funciona o plano de apoio individualizado?",
+      exact: true,
+    });
+    await expect(followUp).toBeVisible();
+    await followUp.click();
+    const reply = await waitForUpiReply(page);
+    expect(reply.length).toBeGreaterThan(10);
+  });
 });

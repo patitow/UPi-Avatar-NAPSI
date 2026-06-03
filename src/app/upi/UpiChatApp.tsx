@@ -6,6 +6,13 @@ import { SettingsModal } from "../components/SettingsModal";
 import { InfoModal } from "../components/InfoModal";
 import { useSpeech } from "../../hooks/useSpeech";
 import type { AccessibilityApi } from "../../hooks/useAccessibility";
+import {
+  getNextSuggestions,
+  resolveFlowFromText,
+  ROOT_QUICK_QUESTIONS,
+  type SuggestionState,
+} from "./conversationFlows";
+import { QuickSuggestions } from "./QuickSuggestions";
 import styles from "./UpiChatApp.module.css";
 
 const API_URL = "/api";
@@ -32,14 +39,11 @@ function buildChatHistory(
     }));
 }
 
-const QUICK_QUESTIONS = [
-  "Como agendar um atendimento?",
-  "Onde fica o NAPSI?",
-  "Quais serviços o NAPSI oferece?",
-  "O NAPSI apoia alunos com TEA?",
-];
-
 type ApiStatus = "online" | "offline" | "checking";
+
+function normalizeForAsked(text: string): string {
+  return text.trim().toLowerCase().replace(/\s+/g, " ");
+}
 
 interface UpiChatAppProps {
   a11y: AccessibilityApi;
@@ -56,6 +60,8 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
   const [isReacting, setIsReacting] = useState(false);
   const [apiStatus, setApiStatus] = useState<ApiStatus>("checking");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [flowState, setFlowState] = useState<SuggestionState | null>(null);
+  const [showRootQuick, setShowRootQuick] = useState(true);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const reactTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -128,6 +134,19 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
 
       stop();
       const trimmed = text.trim();
+      const resolved = resolveFlowFromText(trimmed);
+      if (resolved) {
+        setShowRootQuick(false);
+        setFlowState((prev) => {
+          const asked = new Set(prev?.askedTexts ?? []);
+          asked.add(normalizeForAsked(trimmed));
+          return {
+            flowId: resolved.flowId,
+            lastNodeId: resolved.nodeId,
+            askedTexts: asked,
+          };
+        });
+      }
       const chatHistory = buildChatHistory(messages);
       setMessages((prev) => [
         ...prev,
@@ -204,8 +223,25 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
     setEmotion("happy");
     setIsSpeaking(false);
     setIsReacting(false);
+    setFlowState(null);
+    setShowRootQuick(true);
     a11y.announceStatus("Nova conversa iniciada");
   };
+
+  const lastMessage = messages[messages.length - 1];
+  const showFollowUpSuggestions =
+    !loading &&
+    flowState !== null &&
+    showRootQuick === false &&
+    lastMessage?.from === "upi" &&
+    !lastMessage?.isError;
+
+  const followUpSuggestions = showFollowUpSuggestions
+    ? getNextSuggestions(flowState)
+    : [];
+
+  const showRootSuggestions =
+    messages.length === 1 && showRootQuick && !loading;
 
   const statusLabel = {
     online: {
@@ -617,29 +653,30 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
             <div ref={bottomRef} />
           </div>
 
-          {messages.length === 1 && (
-            <div className={styles.quickWrap}>
-              <p className={styles.quickLabel} id="quick-questions-label">
-                Perguntas frequentes
-              </p>
-              <div
-                className={styles.quickGrid}
-                role="group"
-                aria-labelledby="quick-questions-label"
-              >
-                {QUICK_QUESTIONS.map((q) => (
-                  <button
-                    key={q}
-                    type="button"
-                    className={styles.quickBtn}
-                    onClick={() => sendMessage(q)}
-                    disabled={loading}
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
-            </div>
+          {showRootSuggestions && (
+            <QuickSuggestions
+              label="Perguntas frequentes"
+              suggestions={ROOT_QUICK_QUESTIONS}
+              onPick={sendMessage}
+              disabled={loading}
+            />
+          )}
+
+          {showFollowUpSuggestions && followUpSuggestions.length > 0 && (
+            <QuickSuggestions
+              label="Continue por aqui"
+              suggestions={followUpSuggestions}
+              flowId={flowState.flowId}
+              onPick={sendMessage}
+              onShowRoots={() => {
+                setShowRootQuick(true);
+                setFlowState(null);
+                a11y.announceStatus(
+                  "Perguntas frequentes principais exibidas novamente",
+                );
+              }}
+              disabled={loading}
+            />
           )}
 
           <ChatInputBar onSend={sendMessage} disabled={loading} />
