@@ -10,6 +10,8 @@ interface SettingsModalProps {
   setVoiceEnabled: (enabled: boolean) => void;
   voiceSpeed: number;
   setVoiceSpeed: (speed: number) => void;
+  highContrast?: boolean;
+  setHighContrast?: (enabled: boolean) => void;
 }
 
 export function SettingsModal({
@@ -21,6 +23,8 @@ export function SettingsModal({
   setVoiceEnabled,
   voiceSpeed,
   setVoiceSpeed,
+  highContrast = false,
+  setHighContrast,
 }: SettingsModalProps) {
   return (
     <AnimatePresence>
@@ -80,6 +84,32 @@ export function SettingsModal({
                     ))}
                   </div>
                 </div>
+
+                {/* Alto contraste */}
+                {setHighContrast && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-slate-700">
+                        Alto contraste (Alt+C)
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setHighContrast(!highContrast)}
+                        className={`w-12 h-6 rounded-full transition-all relative ${
+                          highContrast ? 'bg-cyan-500' : 'bg-slate-200'
+                        }`}
+                        aria-pressed={highContrast}
+                        aria-label="Alternar alto contraste"
+                      >
+                        <div
+                          className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${
+                            highContrast ? 'left-7' : 'left-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Voz */}
                 <div className="space-y-3">

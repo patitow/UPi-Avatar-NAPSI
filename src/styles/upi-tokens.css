@@ -1,0 +1,148 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --blue-900: #003087;
+  --blue-700: #0047ab;
+  --blue-500: #2979ff;
+  --blue-100: #e3f0ff;
+  --blue-50: #f0f6ff;
+
+  --gold: #f5a623;
+  --gold-light: #fff3dc;
+
+  --gray-900: #1a1d23;
+  --gray-700: #3d4350;
+  --gray-400: #8c92a0;
+  --gray-200: #e4e7ee;
+  --gray-100: #f2f4f8;
+  --gray-50: #f8f9fc;
+
+  --white: #ffffff;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+
+  --font: "Inter", system-ui, sans-serif;
+  --chat-font-size: 15px;
+}
+
+html.high-contrast button,
+html.high-contrast textarea,
+html.high-contrast a {
+  outline: 2px solid #ffffff !important;
+  outline-offset: 1px;
+}
+
+html.high-contrast {
+  --blue-900: #000000;
+  --blue-700: #000000;
+  --blue-500: #ffffff;
+  --blue-100: #000000;
+  --blue-50: #000000;
+  --gray-900: #ffffff;
+  --gray-700: #ffffff;
+  --gray-400: #ffffff;
+  --gray-200: #ffffff;
+  --gray-100: #000000;
+  --gray-50: #000000;
+  --white: #000000;
+}
+
+html.font-large {
+  --chat-font-size: 17px;
+}
+
+html.font-extra-large {
+  --chat-font-size: 19px;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--gray-50);
+  color: var(--gray-900);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+  margin: 0;
+}
+
+button {
+  font-family: var(--font);
+  cursor: pointer;
+}
+
+input,
+textarea {
+  font-family: var(--font);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gray-200);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-400);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sr-only:focus,
+.sr-only:focus-visible {
+  position: fixed;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 1rem;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  z-index: 100;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: var(--blue-700);
+  color: var(--white);
+  border-radius: var(--radius-sm);
+  outline: 2px solid var(--white);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
