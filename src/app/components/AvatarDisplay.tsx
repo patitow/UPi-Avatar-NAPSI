@@ -1,4 +1,5 @@
-import { motion } from "motion/react";
+import { motion } from "framer-motion"; // Ajustado para o padrão do framer-motion
+import { useEffect, useRef } from "react";
 
 export type AvatarState =
   | "idle"
@@ -12,73 +13,80 @@ interface AvatarDisplayProps {
   isLoginScreen?: boolean;
 }
 
-const stateToAsset = {
+const stateToAsset: Record<AvatarState, string> = {
   idle: "/assets/static_sprites/showing_computer_idle.png",
-  thinking: "/assets/animated_sprites/thinking.gif",
-  talking: "/assets/animated_sprites/waving.gif",
+  thinking: "/assets/static_sprites/thinking.png",
+  talking: "/assets/animated_sprites/falando.mp4",
   happy: "/assets/animated_sprites/celebrating.gif",
   surprised: "/assets/animated_sprites/unsure.gif",
-  investigating: "/assets/animated_sprites/investigating.gif",
 };
 
 export function AvatarDisplay({ state, isLoginScreen }: AvatarDisplayProps) {
-  const assetUrl = stateToAsset[state] || stateToAsset.idle;
+  const assetUrl = stateToAsset[state] ?? stateToAsset.idle;
+  const isVideo = assetUrl.endsWith(".mp4");
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Console log mantido de forma limpa dentro do escopo correto
+  console.log("🎬 AvatarDisplay render:", { state, assetUrl, isVideo });
+
+  useEffect(() => {
+    if (!isVideo || !videoRef.current) return;
+    videoRef.current.load();
+    videoRef.current.play().catch(() => {});
+  }, [assetUrl, isVideo]);
+
+  const mediaElement = isVideo ? (
+    <video
+      ref={videoRef}
+      key={assetUrl}
+      src={assetUrl}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      style={{
+        display: "block",
+        width: "100%",
+        height: "100%",
+        objectFit: "contain",
+         mixBlendMode: "multiply", // ← adiciona isso
+      }}
+    />
+  ) : (
+    <img
+      key={assetUrl}
+      src={assetUrl}
+      alt=""
+      style={{
+        display: "block",
+        width: "100%",
+        height: "100%",
+        objectFit: "contain",
+      }}
+    />
+  );
 
   return (
-    <div className={`relative ${isLoginScreen ? "w-full h-full" : ""}`}>
-      {/* Glow effect */}
-      <motion.div
-        className={`absolute inset-0 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full blur-3xl opacity-30`}
-        animate={{
-          scale:
-            state === "thinking"
-              ? [1, 1.2, 1]
-              : state === "talking" || isLoginScreen
-                ? [1, 1.1, 1]
-                : 1,
-          opacity: state === "idle" ? 0.3 : 0.5,
-        }}
-        transition={{
-          duration: state === "thinking" ? 2 : state === "talking" ? 0.8 : 3,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-
-      {/* Avatar Container with Masking for Login */}
-      <motion.div
-        animate={{
-          y: state === "idle" || isLoginScreen ? [0, -8, 0] : 0,
-          rotate: state === "thinking" ? [0, -5, 5, -5, 0] : 0,
-        }}
-        transition={{
-          duration: state === "idle" || isLoginScreen ? 3 : 2,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className={`relative ${isLoginScreen ? "w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-white shadow-inner border-4 border-white" : ""}`}
-      >
-        <img
-          src={assetUrl}
-          key={assetUrl} // Force re-render for GIFs
-          alt="UPi"
-          className={`${isLoginScreen ? "w-full h-full object-cover scale-[1.05] translate-y-1" : "w-full h-full object-contain"} drop-shadow-2xl relative z-10`}
-        />
-      </motion.div>
-
-      {/* Status Indicator */}
-      {state !== "idle" && !isLoginScreen && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white px-4 py-1.5 rounded-full shadow-lg"
-        >
-          <span className="text-xs text-slate-600">
-            {state === "thinking" ? "Pensando..." : "Digitando..."}
-          </span>
-        </motion.div>
-      )}
-    </div>
+    <motion.div
+      aria-label={`Avatar UPi – ${state}`}
+      animate={{
+        y: state === "idle" || isLoginScreen ? [0, -8, 0] : 0,
+        rotate: state === "thinking" ? [0, -5, 5, -5, 0] : 0,
+      }}
+      transition={{
+        duration: state === "idle" || isLoginScreen ? 3 : 2,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+      style={{ width: "100%", height: "100%" }}
+      className={
+        isLoginScreen
+          ? "rounded-full overflow-hidden bg-white shadow-inner border-4 border-white"
+          : "drop-shadow-2xl"
+      }
+    >
+      {mediaElement}
+    </motion.div>
   );
 }
