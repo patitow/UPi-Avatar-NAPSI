@@ -68,7 +68,8 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
         setApiStatus("online");
         const store = data.vector_store ?? "—";
         setAiMode({
-          provider: data.llm_provider ?? (store === "chroma" ? "ollama" : "cloud"),
+          provider:
+            data.llm_provider ?? (store === "pgvector" ? "ollama" : "cloud"),
           model: data.llm_model ?? "ativo",
           vectorStore: store,
         });
@@ -557,8 +558,8 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
                 <li>🤖 {aiMode.model}</li>
                 <li>
                   🗄️{" "}
-                  {aiMode.vectorStore === "chroma"
-                    ? "ChromaDB local"
+                  {aiMode.vectorStore === "pgvector"
+                    ? "PostgreSQL (pgvector)"
                     : aiMode.vectorStore}
                 </li>
               </ul>
