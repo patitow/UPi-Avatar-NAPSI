@@ -90,6 +90,16 @@ export const CONVERSATION_FLOWS: ConversationFlow[] = [
       {
         id: "services:adaptacao",
         text: "Ajuda em adaptação de provas e atividades?",
+        children: [
+          {
+            id: "services:adaptacao:tempo",
+            text: "Como solicitar tempo adicional ou ambiente separado na prova?",
+          },
+        ],
+      },
+      {
+        id: "services:provas",
+        text: "Estou ansioso na semana de provas, o NAPSI pode ajudar?",
       },
       {
         id: "services:publico",
@@ -118,6 +128,10 @@ export const CONVERSATION_FLOWS: ConversationFlow[] = [
       {
         id: "tea:sala",
         text: "O NAPSI ajuda com adaptações em sala de aula?",
+      },
+      {
+        id: "tea:ambiente",
+        text: "Posso pedir ambiente com menos ruído por causa do TEA?",
       },
       {
         id: "tea:tdah",
