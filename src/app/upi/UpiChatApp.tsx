@@ -169,7 +169,7 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
         a11y.announceStatus("UPi respondeu");
       } catch {
         const errText =
-          "Oxe! Não consegui falar com o servidor. Verifica se a API tá rodando, visse?";
+          "Não tô conseguindo me conectar ao sistema do UPi, tenta de novo em instantes, ou entra em contato com o NAPSI pelo e-mail napsi@poli.upe.br.";
         setMessages((prev) => [
           ...prev,
           {
@@ -184,9 +184,7 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
         triggerReact("sad");
         speak(errText);
         setApiStatus("offline");
-        a11y.announceError(
-          "Erro ao conectar com o UPi. Verifique se a API está em execução.",
-        );
+        a11y.announceError(errText);
       } finally {
         setLoading(false);
       }
