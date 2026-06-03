@@ -1,8 +1,6 @@
 import type { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
-export const SESSION_KEY = "upi-session-active";
-
 export async function enterChat(page: Page) {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page
@@ -13,6 +11,7 @@ export async function enterChat(page: Page) {
   ).toBeVisible();
 }
 
+/** Falha com mensagem clara se a API (via proxy) não estiver no ar. */
 export async function waitApiOnline(page: Page) {
   await expect
     .poll(
@@ -22,7 +21,7 @@ export async function waitApiOnline(page: Page) {
         const body = (await res.json()) as { ok?: boolean };
         return body.ok === true;
       },
-      { timeout: 45_000, intervals: [500, 1000, 2000] },
+      { timeout: 15_000, intervals: [500, 1000, 2000] },
     )
     .toBe(true);
 }

@@ -33,8 +33,11 @@ Interface web interativa para o UPi, o assistente virtual do Núcleo de Apoio Ps
    pnpm install
    ```
 
-2. Configure a URL do Backend:
-   Verifique em `src/app/components/ChatInterface.tsx` se a URL está apontando para `http://localhost:8000`.
+2. Variáveis locais (opcional):
+   ```bash
+   copy .env.example .env
+   ```
+   O chat usa o proxy `/api` → `http://localhost:8000` (ver `vite.config.ts`). Nenhum script do repo apaga ou reescreve o seu `.env`.
 
 ## ⚙️ Execução
 
