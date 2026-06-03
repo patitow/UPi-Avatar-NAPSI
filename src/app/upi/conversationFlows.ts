@@ -45,6 +45,10 @@ export const CONVERSATION_FLOWS: ConversationFlow[] = [
         id: "scheduling:quem",
         text: "Qualquer aluno da POLI pode solicitar atendimento?",
       },
+      {
+        id: "scheduling:escolaridade",
+        text: "O NAPSI ajuda com segunda chamada e abono de faltas?",
+      },
     ],
   },
   {

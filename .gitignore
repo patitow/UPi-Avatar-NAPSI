@@ -56,3 +56,5 @@ coverage
 
 # TypeScript
 *.tsbuildinfo
+
+*.mp4
