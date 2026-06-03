@@ -38,7 +38,27 @@ const SCENARIOS: {
       return waitForUpiReply(page);
     },
     mustMatch: [/upi|napsi|oi|olá|ajudar|massa|oxe|visse/i],
-    mustNotMatch: [/não tô conseguindo me conectar/i],
+    mustNotMatch: [
+      /não tô conseguindo me conectar/i,
+      /seja bem-vindo/i,
+      /\blindo\b|\blinda\b/i,
+      /\b(tá|tô|pra)\b/i,
+    ],
+  },
+  {
+    name: "oi casual sem apelido",
+    ask: async (page) => {
+      await sendChatMessage(page, "oi lindo");
+      return waitForUpiReply(page);
+    },
+    mustMatch: [/upi|napsi/i],
+    mustNotMatch: [
+      /\blindo\b|\blinda\b/i,
+      /seja bem-vindo/i,
+      /saúde mental/i,
+      /não tô conseguindo me conectar/i,
+      /\b(tá|tô|pra)\b/i,
+    ],
   },
 ];
 

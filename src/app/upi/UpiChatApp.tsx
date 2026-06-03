@@ -13,7 +13,7 @@ const API_URL = "/api";
 const WELCOME_MESSAGE: UpiChatMessage = {
   id: "welcome",
   from: "upi",
-  text: "Oi! Sou o UPi, assistente virtual do NAPSI aqui na POLI/UPE! Massa demais ter você aqui, visse? Pode me perguntar qualquer coisa sobre o núcleo — atendimentos, serviços, como agendar... Tô aqui pra ajudar!",
+  text: "Oi! Sou o UPi, assistente virtual do NAPSI na POLI/UPE! Massa demais falar com você, visse? Pode perguntar qualquer coisa sobre o núcleo — atendimentos, serviços, como agendar. Estou aqui para ajudar!",
   emotion: "happy",
   time: new Date(),
 };
@@ -513,7 +513,7 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
             <p className={styles.infoTitle}>NAPSI — POLI/UPE</p>
             <ul className={styles.infoList}>
               <li>📍 Bloco A, Sala 12</li>
-              <li>🕗 Seg a Sex, 08h–17h</li>
+              <li>🕗 Segunda a Sexta, 08h–17h</li>
               <li>
                 ✉️{" "}
                 <a href="mailto:napsi@poli.upe.br">napsi@poli.upe.br</a>
