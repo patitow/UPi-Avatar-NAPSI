@@ -88,6 +88,12 @@ export default function App() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
       const data = await res.json()
+
+      console.log("RESPOSTA API:", data)
+
+      console.log("Audio recebido:", !!data.audio)
+      console.log("Tamanho:", data.audio?.length)
+
       const responseText    = data.response ?? 'Eita, não entendi a resposta do servidor!'
       const responseEmotion = data.emotion  ?? 'neutral'
 
@@ -97,7 +103,18 @@ export default function App() {
       }])
 
       triggerReact(responseEmotion)
-      speak(responseText)   // fala via TTS — isSpeaking é controlado pelos callbacks do hook
+
+      if (data.audio) {
+        const audio = new Audio(data.audio)
+
+        audio.onplay = () => setIsSpeaking(true)
+        audio.onended = () => setIsSpeaking(false)
+
+        audio.play()
+      } else {
+        speak(responseText)
+      }
+
       setApiStatus('online')
     } catch {
       const errText = 'Oxe! Não consegui falar com o servidor. Verifica se a API tá rodando, visse?'
