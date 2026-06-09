@@ -13,9 +13,8 @@ import {
   type SuggestionState,
 } from "./conversationFlows";
 import { QuickSuggestions } from "./QuickSuggestions";
+import { API_URL } from "../../config/api";
 import styles from "./UpiChatApp.module.css";
-
-const API_URL = "/api";
 
 const WELCOME_MESSAGE: UpiChatMessage = {
   id: "welcome",
