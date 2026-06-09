@@ -8,6 +8,12 @@ import sharp from "sharp";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const assetsDir = join(root, "public", "assets");
 
+/** Preset equilibrado: boa qualidade visual sem voltar aos MBs originais. */
+const PRESET = {
+  jpeg: { maxWidth: 960, quality: 92 },
+  mp4: { crf: 23, scale: 960, preset: "slow" },
+};
+
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -17,8 +23,9 @@ function formatBytes(bytes) {
 function logChange(label, before, after) {
   const saved = before - after;
   const pct = before ? ((saved / before) * 100).toFixed(1) : "0.0";
+  const sign = saved >= 0 ? "-" : "+";
   console.log(
-    `[ok] ${label}: ${formatBytes(before)} -> ${formatBytes(after)} (-${pct}%)`,
+    `[ok] ${label}: ${formatBytes(before)} -> ${formatBytes(after)} (${sign}${Math.abs(pct)}%)`,
   );
 }
 
@@ -35,8 +42,8 @@ async function optimizeJpegs() {
     const before = statSync(input).size;
 
     await sharp(input)
-      .resize({ width: 640, withoutEnlargement: true })
-      .jpeg({ quality: 80, mozjpeg: true })
+      .resize({ width: PRESET.jpeg.maxWidth, withoutEnlargement: true })
+      .jpeg({ quality: PRESET.jpeg.quality, mozjpeg: true })
       .toFile(tmp);
 
     renameSync(tmp, input);
@@ -63,13 +70,15 @@ function optimizeMp4() {
       "-vcodec",
       "libx264",
       "-crf",
-      "30",
+      String(PRESET.mp4.crf),
       "-preset",
-      "medium",
+      PRESET.mp4.preset,
       "-movflags",
       "+faststart",
+      "-pix_fmt",
+      "yuv420p",
       "-vf",
-      "scale=480:-2",
+      `scale=${PRESET.mp4.scale}:-2`,
       output,
     ],
     { stdio: "inherit" },
@@ -79,7 +88,9 @@ function optimizeMp4() {
   logChange("avatar_falando.mp4", before, statSync(input).size);
 }
 
-console.log("Otimizando assets em public/assets/ ...");
+console.log(
+  `Otimizando assets (preset equilibrado: jpeg q${PRESET.jpeg.quality}, mp4 crf${PRESET.mp4.crf} @${PRESET.mp4.scale}px) ...`,
+);
 await optimizeJpegs();
 optimizeMp4();
 console.log("Concluido.");
