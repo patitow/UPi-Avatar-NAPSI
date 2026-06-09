@@ -57,5 +57,6 @@ coverage
 # TypeScript
 *.tsbuildinfo
 
+# Vídeos locais/temporários (o avatar de produção fica versionado abaixo)
 *.mp4
 !public/assets/avatar_falando.mp4

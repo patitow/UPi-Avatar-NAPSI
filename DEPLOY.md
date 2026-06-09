@@ -11,7 +11,7 @@ Guia completo (backend + DNS Cloudflare): [`../DEPLOY.md`](../DEPLOY.md).
 ## Variável de ambiente (Production)
 
 ```
-VITE_API_BASE_URL=https://api.upi.patitow.dev
+VITE_API_BASE_URL=https://upi-api.patitow.dev
 ```
 
 Sem essa variável, o build usa `/api` (proxy do Vite), que **não existe** na Vercel — o chat fica offline.
