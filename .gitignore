@@ -58,3 +58,4 @@ coverage
 *.tsbuildinfo
 
 *.mp4
+!public/assets/avatar_falando.mp4

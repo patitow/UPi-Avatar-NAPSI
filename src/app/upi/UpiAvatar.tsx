@@ -1,10 +1,11 @@
+import { useEffect, useRef } from "react";
 import styles from "./UpiAvatar.module.css";
 
 const ASSETS = {
   idle: "/assets/avatar_idle.jpeg",
   thinking: "/assets/avatar_pensando.jpeg",
   interacting: "/assets/avatar_interagindo.jpeg",
-  speaking: "/assets/animated_sprites/waving.gif",
+  video: "/assets/avatar_falando.mp4",
 } as const;
 
 function getImageSrc(
@@ -48,9 +49,19 @@ export function UpiAvatar({
   isReacting = false,
   compact = false,
 }: UpiAvatarProps) {
-  const imageSrc = isSpeaking
-    ? ASSETS.speaking
-    : getImageSrc(emotion, loading, isReacting);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const imageSrc = getImageSrc(emotion, loading, isReacting);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (isSpeaking) {
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+      video.currentTime = 0;
+    }
+  }, [isSpeaking]);
 
   const stateLabel = loading
     ? "pensando"
@@ -67,11 +78,21 @@ export function UpiAvatar({
       aria-label={`Avatar UPi — estado: ${stateLabel}`}
       role="img"
     >
+      <video
+        ref={videoRef}
+        src={ASSETS.video}
+        muted
+        loop
+        playsInline
+        preload="auto"
+        aria-hidden="true"
+        className={`${styles.media} ${isSpeaking ? styles.visible : styles.hidden}`}
+      />
       <img
         src={imageSrc}
         alt=""
         draggable={false}
-        className={styles.media}
+        className={`${styles.media} ${isSpeaking ? styles.hidden : styles.visible}`}
       />
     </div>
   );
