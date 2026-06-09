@@ -13,7 +13,7 @@ import {
   type SuggestionState,
 } from "./conversationFlows";
 import { QuickSuggestions } from "./QuickSuggestions";
-import { API_URL } from "../../config/api";
+import { API_URL, apiFetch } from "../../config/api";
 import styles from "./UpiChatApp.module.css";
 
 const WELCOME_MESSAGE: UpiChatMessage = {
@@ -161,11 +161,11 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
       a11y.announceStatus("UPi está processando sua mensagem");
 
       try {
-        const res = await fetch(`${API_URL}/chat`, {
+        const res = await apiFetch("/chat", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: trimmed, chat_history: chatHistory }),
         });
+        if (res.status === 401) throw new Error("AUTH_REQUIRED");
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const data = await res.json();
@@ -188,7 +188,12 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
         speak(responseText, typeof data.audio === "string" ? data.audio : null);
         setApiStatus("online");
         a11y.announceStatus("UPi respondeu");
-      } catch {
+      } catch (err) {
+        if (err instanceof Error && err.message === "AUTH_REQUIRED") {
+          onLogout?.();
+          a11y.announceError("Sessão expirada. Informe a senha novamente.");
+          return;
+        }
         const errText =
           "Não estou conseguindo me conectar ao sistema do UPi. Tente de novo em instantes ou entre em contato com o NAPSI pelo e-mail napsi@poli.upe.br.";
         setMessages((prev) => [
@@ -210,7 +215,7 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
         setLoading(false);
       }
     },
-    [loading, triggerReact, speak, stop, a11y],
+    [loading, triggerReact, speak, stop, a11y, onLogout, messages],
   );
 
   const handleClear = () => {

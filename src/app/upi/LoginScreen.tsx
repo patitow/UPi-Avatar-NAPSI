@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
 import { useReducedMotion } from "motion/react";
 import type { AccessibilityApi } from "../../hooks/useAccessibility";
+import { API_URL, apiFetch } from "../../config/api";
+import { setSiteAuthToken } from "../../utils/authStorage";
 import styles from "./LoginScreen.module.css";
 
 interface LoginScreenProps {
@@ -9,6 +12,55 @@ interface LoginScreenProps {
 
 export function LoginScreen({ onLogin, a11y }: LoginScreenProps) {
   const prefersReducedMotion = useReducedMotion();
+  const [authRequired, setAuthRequired] = useState(import.meta.env.PROD);
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!import.meta.env.PROD) {
+      setAuthRequired(false);
+      return;
+    }
+
+    fetch(`${API_URL}/auth/config`)
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((data: { required?: boolean }) => {
+        setAuthRequired(Boolean(data?.required));
+      })
+      .catch(() => setAuthRequired(true));
+  }, []);
+
+  const enterWithoutPassword = () => {
+    a11y.announceStatus("Entrando no UPi");
+    onLogin();
+  };
+
+  const submitPassword = async () => {
+    if (!password.trim() || loading) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await apiFetch("/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ password: password.trim() }),
+      });
+      if (!res.ok) {
+        setError("Senha incorreta. Tente novamente.");
+        a11y.announceError("Senha incorreta");
+        return;
+      }
+      const data = (await res.json()) as { token?: string | null };
+      if (data.token) setSiteAuthToken(data.token);
+      a11y.announceStatus("Acesso autorizado. Entrando no UPi");
+      onLogin();
+    } catch {
+      setError("Não foi possível validar a senha agora. Tente de novo.");
+      a11y.announceError("Falha ao validar senha");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -46,47 +98,55 @@ export function LoginScreen({ onLogin, a11y }: LoginScreenProps) {
 
         <div className={styles.divider} aria-hidden="true" />
 
-        <button
-          type="button"
-          className={styles.loginBtn}
-          onClick={() => {
-            a11y.announceStatus("Entrando no UPi");
-            onLogin();
-          }}
-          aria-label="Entrar com conta Google. Acesso restrito a e-mails @upe.br"
-        >
-          <svg
-            aria-hidden="true"
-            width="18"
-            height="18"
-            viewBox="0 0 18 18"
-            fill="none"
+        {authRequired ? (
+          <form
+            className={styles.passwordForm}
+            onSubmit={(e) => {
+              e.preventDefault();
+              void submitPassword();
+            }}
           >
-            <path
-              d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z"
-              fill="currentColor"
+            <label className={styles.passwordLabel} htmlFor="site-password">
+              Senha de acesso
+            </label>
+            <input
+              id="site-password"
+              type="password"
+              className={styles.passwordInput}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              placeholder="Digite a senha do site"
+              disabled={loading}
             />
-            <path
-              d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z"
-              fill="currentColor"
-              opacity="0.85"
-            />
-            <path
-              d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z"
-              fill="currentColor"
-              opacity="0.7"
-            />
-            <path
-              d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58Z"
-              fill="currentColor"
-              opacity="0.9"
-            />
-          </svg>
-          Entrar com Google
-        </button>
+            {error ? (
+              <p className={styles.errorText} role="alert">
+                {error}
+              </p>
+            ) : null}
+            <button
+              type="submit"
+              className={styles.loginBtn}
+              disabled={loading || !password.trim()}
+            >
+              {loading ? "Validando..." : "Entrar"}
+            </button>
+          </form>
+        ) : (
+          <button
+            type="button"
+            className={styles.loginBtn}
+            onClick={enterWithoutPassword}
+            aria-label="Entrar no UPi"
+          >
+            Entrar
+          </button>
+        )}
 
         <p className={styles.footerNote}>
-          Acesso restrito a <strong>@upe.br</strong>
+          {authRequired
+            ? "Acesso restrito · uso autorizado NAPSI/POLI"
+            : "Ambiente de desenvolvimento"}
           {!prefersReducedMotion ? "" : " · Animações reduzidas pelo sistema"}
         </p>
       </main>

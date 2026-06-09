@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAccessibility } from "../hooks/useAccessibility";
 import { isSessionActive, setSessionActive } from "../utils/a11yStorage";
+import { clearSiteAuthToken } from "../utils/authStorage";
 import { LoginScreen } from "./upi/LoginScreen";
 import { UpiChatApp } from "./upi/UpiChatApp";
 
@@ -15,6 +16,7 @@ export default function App() {
 
   const handleLogout = () => {
     setSessionActive(false);
+    clearSiteAuthToken();
     setAuthenticated(false);
     a11y.announceStatus("Sessão encerrada. Você saiu do UPi.");
   };
