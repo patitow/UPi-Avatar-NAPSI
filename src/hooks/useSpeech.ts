@@ -147,7 +147,7 @@ export function useSpeech({
       const useServer =
         shouldPreferServerAudio() &&
         serverAudio &&
-        serverAudio.startsWith("data:audio");
+        (serverAudio.startsWith("data:audio") || serverAudio.endsWith(".mp3"));
 
       if (useServer) {
         const audio = new Audio(serverAudio);

@@ -118,6 +118,10 @@ export function LoginScreen({ onLogin, a11y }: LoginScreenProps) {
               autoComplete="current-password"
               placeholder="Digite a senha do site"
               disabled={loading}
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              inputMode="text"
             />
             {error ? (
               <p className={styles.errorText} role="alert">

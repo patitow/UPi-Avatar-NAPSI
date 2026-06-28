@@ -22,6 +22,7 @@ const WELCOME_MESSAGE: UpiChatMessage = {
   text: "Oi! Sou o UPi, assistente virtual do NAPSI na POLI/UPE! Massa demais falar com você, visse? Pode perguntar qualquer coisa sobre o núcleo — atendimentos, serviços, como agendar. Estou aqui para ajudar!",
   emotion: "happy",
   time: new Date(),
+  audio: "/boas_vindas.mp3",
 };
 
 const MAX_HISTORY_TURNS = 10;
@@ -181,11 +182,12 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
             text: responseText,
             emotion: responseEmotion,
             time: new Date(),
+            audio: data.response ? data.audio : "/erro_servidor.mp3",
           },
         ]);
 
         triggerReact(responseEmotion);
-        speak(responseText, typeof data.audio === "string" ? data.audio : null);
+        speak(responseText, typeof data.audio === "string" ? data.audio : "/erro_servidor.mp3");
         setApiStatus("online");
         a11y.announceStatus("UPi respondeu");
       } catch (err) {
@@ -205,10 +207,11 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
             emotion: "sad",
             time: new Date(),
             isError: true,
+            audio: "/erro_conexao.mp3",
           },
         ]);
         triggerReact("sad");
-        speak(errText);
+        speak(errText, "/erro_conexao.mp3");
         setApiStatus("offline");
         a11y.announceError(errText);
       } finally {
@@ -641,8 +644,16 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
             aria-relevant="additions"
             tabIndex={-1}
           >
-            {messages.map((msg) => (
-              <ChatMessage key={msg.id} message={msg} />
+            {messages.map((m) => (
+              <ChatMessage
+                key={m.id}
+                message={m}
+                onPlayAudio={
+                  m.from === "upi"
+                    ? (text, audio) => speak(text, audio ?? null)
+                    : undefined
+                }
+              />
             ))}
 
             {loading && (
