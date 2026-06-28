@@ -30,10 +30,9 @@ function formatTime(date: Date) {
 
 interface ChatMessageProps {
   message: UpiChatMessage;
-  onPlayAudio?: (text: string, audio?: string) => void;
 }
 
-export function ChatMessage({ message, onPlayAudio }: ChatMessageProps) {
+export function ChatMessage({ message }: ChatMessageProps) {
   const isUpi = message.from === "upi";
   const icon =
     message.emotion && EMOTION_ICON[message.emotion]
@@ -56,19 +55,9 @@ export function ChatMessage({ message, onPlayAudio }: ChatMessageProps) {
         className={`${styles.bubble} ${isUpi ? styles.bubbleUpi : styles.bubbleUser} ${message.isError ? styles.bubbleError : ""}`}
       >
         {isUpi && (
-          <div className={styles.senderHeader}>
-            <span className={styles.senderLabel}>UPi {icon}</span>
-            {onPlayAudio && (
-              <button
-                className={styles.playButton}
-                onClick={() => onPlayAudio(message.text, message.audio)}
-                title="Ouvir mensagem"
-                aria-label="Ouvir mensagem"
-              >
-                🔊
-              </button>
-            )}
-          </div>
+          <span className={styles.senderLabel}>
+            UPi {icon}
+          </span>
         )}
         <p className={styles.text}>{message.text}</p>
         <time className={styles.time} dateTime={message.time.toISOString()}>

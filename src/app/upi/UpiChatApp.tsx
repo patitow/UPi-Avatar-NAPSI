@@ -99,6 +99,14 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
     }
   }, [apiStatus, a11y]);
 
+  const hasPlayedWelcome = useRef(false);
+  useEffect(() => {
+    if (!hasPlayedWelcome.current && WELCOME_MESSAGE.audio) {
+      hasPlayedWelcome.current = true;
+      speak(WELCOME_MESSAGE.text, WELCOME_MESSAGE.audio);
+    }
+  }, [speak]);
+
   useEffect(() => {
     if (!mobileMenuOpen) return;
     const onDocClick = (e: MouseEvent) => {
@@ -645,15 +653,7 @@ export function UpiChatApp({ a11y, onLogout }: UpiChatAppProps) {
             tabIndex={-1}
           >
             {messages.map((m) => (
-              <ChatMessage
-                key={m.id}
-                message={m}
-                onPlayAudio={
-                  m.from === "upi"
-                    ? (text, audio) => speak(text, audio ?? null)
-                    : undefined
-                }
-              />
+              <ChatMessage key={m.id} message={m} />
             ))}
 
             {loading && (
